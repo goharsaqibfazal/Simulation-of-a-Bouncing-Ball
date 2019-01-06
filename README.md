@@ -1,0 +1,2 @@
+# Simulation-of-a-Bouncing-Ball
+In this Java program I calculated the trajectory of a bouncing ball using a simplified physics model. For this Newtonian simulation, I started by writing a program that can output the x and y positions of the ball at sequential increments in time. Later, I added to the program to visually animate the trajectory of the ball in a graphics window and incorporate motion along the horizontal axis.
