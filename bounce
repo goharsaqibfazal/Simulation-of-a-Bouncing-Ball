@@ -1,0 +1,99 @@
+import java.awt.Color;
+
+import acm.graphics.GLine;
+import acm.graphics.GOval;
+import acm.program.GraphicsProgram;
+
+public class bounce extends GraphicsProgram {
+	public void run() {
+
+		this.resize(600, 800); //adjusts the width and height of the window according to the specifications given in the assignment
+
+		/*Using the GOval graphics library a ball is created
+		 * A Line representing the ground is also created using the GLine graphics library
+		 */
+		GOval ball = new GOval(200,100,60,60); //creates a ball with diameter = 60 at coordinates (x,y) = (200,100) 
+		ball.setFilled(true);
+		ball.setFillColor(Color.BLUE);
+		add(ball);
+		add(new GLine(0, 600, 600, 600)); // creates a line from (0,600) to (600,600)
+
+		/*code to read simulation parameters from user
+		 * h0 = initial height of the ball in meters
+		 * l = fraction of energy lost in the collision with the ground
+		 */
+		double a = readDouble("Enter the height of the ball in meters [0,500]: ");
+		double b = readDouble("Fraction of energy lost in the collision with ground[0,1]: ");
+
+		for (int i=0; i<10; i++) { //loop to make the ball bounce again and again
+
+			//Code to initialize variables used in the while loop
+			double h0 = a;
+			double l = b;
+			double totalTime = 0; // total time of the motion
+			boolean directionUp = false;
+			double height = 0; // height of the ball above the ground
+			double time = 0; //time of the motion in one direction
+			double initialUpPosition = 0;
+			double vt = Math.sqrt(2*G*h0); // the vertical velocity of the ball
+			double el = 1-l; // remaining energy of the ball after collision
+			double vx = 8; // the horizontal velocity of the ball
+			double xPos = 10; // x-position of ball
+
+
+			/*simulation loop
+			 *controls the direction of the ball and applies Newtonian mechanics 
+			 */
+			while (totalTime < TIME_OUT) {
+				if (!directionUp) {
+					height = h0 - 0.5*G*Math.pow(2.5*time, 2); //multiplied time with 2.5 to allow for the ball to move more distance in the same TIME_OUT =30s
+
+					if (height <= 0) {              //ground impact
+						h0 = height;                // new h0, also be used to determine direction
+						initialUpPosition = height; //should be close to 0
+						directionUp = true;
+						time= 0;                    //resetting time for upward arc
+						vt =vt*Math.sqrt(el);       //new impact energy loss
+					}
+				}
+
+				else {                              //direction is up
+					height= initialUpPosition + vt*time*2.5 - 0.5*G*Math.pow(2.5*time, 2); //multiplied time with 2.5 to allow for the ball to move more distance in the same TIME_OUT =30s
+
+					if (height > h0) {              //still going up
+						h0 = height;                //keeping track of last highest point
+					}
+
+					else {                          //starting to go down
+						directionUp = false;
+						time = 0;                   //resetting time for going down
+					}
+				}
+
+				xPos = xPos + vx*INTERVAL_TIME; //adding the range into the x-Position in order to allow for a projectile motion
+				println("Time: "+time + " X: "+ xPos +" Y: "+height); //prints the time, x-Position and height of ball so that the user can follow with the motion at a time interval of 0.01s 
+
+				//Make sure the time increments sequentially 
+				time+= INTERVAL_TIME; 
+				totalTime += INTERVAL_TIME;
+				pause(INTERVAL_TIME*1000);
+
+				add(new GOval(xPos+30,570-height,1,1)); //creates small balls that act as traces on the screen for the actual ball
+				ball.setLocation(xPos, 540-height);// coordinates of the ball throughout the motion
+			}	
+			this.removeAll(); //removes all the traces along with the ball itself from the screen 
+
+			//Creating a new ball in order for the program to replace the original ball
+			GOval ball1 = new GOval(200,100,60,60); //creates a ball with diameter = 60 at coordinates (x,y) = (200,100) 
+			ball.setFilled(true);
+			ball.setFillColor(Color.BLUE);
+			add(ball);
+			add(new GLine(0, 600, 600, 600)); // creates a line from (0,600) to (600,600)
+		}
+	}
+
+	//Constants that will not change throughout the motion of the ball
+	private static final double G = 9.8;  // gravitational constant in m/s^2
+	private static final double TIME_OUT = 30; // The maximum time of motion in seconds
+	private static final double INTERVAL_TIME = 0.01; // The interval time in seconds
+}
